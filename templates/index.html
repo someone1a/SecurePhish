@@ -14,9 +14,10 @@
         <div class="col-md-6">
             <h4>Plantillas disponibles</h4>
             <form action="/create_campaign" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="mb-3">
                     <label for="campaign_name" class="form-label">Nombre de la campaña</label>
-                    <input type="text" class="form-control" id="campaign_name" name="campaign_name" required>
+                    <input type="text" class="form-control" id="campaign_name" name="campaign_name" required maxlength="50">
                 </div>
                 <div class="mb-3">
                     <label for="selected_template" class="form-label">Seleccionar plantilla</label>
@@ -29,7 +30,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="html_file" class="form-label">O subir una plantilla HTML</label>
-                    <input type="file" class="form-control" id="html_file" name="html_file">
+                    <input type="file" class="form-control" id="html_file" name="html_file" accept=".html">
                 </div>
                 <button type="submit" class="btn btn-success">Crear campaña</button>
             </form>
