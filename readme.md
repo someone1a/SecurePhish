@@ -27,7 +27,7 @@ Con **SecurePhish**, puedes crear campañas de phishing personalizadas, seleccio
 
    ```
    bash
-   git clone https://github.com/tuusuario/SecurePhish.git
+   git clone https://github.com/someone1a/SecurePhish.git
    cd SecurePhish
     ````
 
