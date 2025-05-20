@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuración de Correo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <h2>Configuración de Correo Electrónico</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4>Parámetros SMTP</h4>
+        </div>
+        <div class="card-body">
+            <form action="/email_config" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="mb-3">
+                    <label for="mail_server" class="form-label">Servidor SMTP</label>
+                    <input type="text" class="form-control" id="mail_server" name="mail_server" value="{{ config.get('mail_server', '') }}" required>
+                    <div class="form-text">Ejemplo: smtp.gmail.com, smtp.office365.com</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="mail_port" class="form-label">Puerto</label>
+                    <input type="number" class="form-control" id="mail_port" name="mail_port" value="{{ config.get('mail_port', 587) }}" required>
+                    <div class="form-text">Puertos comunes: 587 (TLS), 465 (SSL)</div>
+                </div>
+                
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="mail_use_tls" name="mail_use_tls" {% if config.get('mail_use_tls', True) %}checked{% endif %}>
+                    <label class="form-check-label" for="mail_use_tls">Usar TLS</label>
+                </div>
+                
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="mail_use_ssl" name="mail_use_ssl" {% if config.get('mail_use_ssl', False) %}checked{% endif %}>
+                    <label class="form-check-label" for="mail_use_ssl">Usar SSL</label>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="mail_username" class="form-label">Usuario</label>
+                    <input type="text" class="form-control" id="mail_username" name="mail_username" value="{{ config.get('mail_username', '') }}" required>
+                    <div class="form-text">Normalmente es su dirección de correo completa</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="mail_password" class="form-label">Contraseña</label>
+                    <input type="password" class="form-control" id="mail_password" name="mail_password" value="{{ config.get('mail_password', '') }}" required>
+                    <div class="form-text">Para Gmail, puede necesitar una contraseña de aplicación</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="mail_default_sender" class="form-label">Correo del remitente predeterminado</label>
+                    <input type="email" class="form-control" id="mail_default_sender" name="mail_default_sender" value="{{ config.get('mail_default_sender', '') }}" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Guardar configuración</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="alert alert-info">
+        <h5>Nota importante:</h5>
+        <p>Si está utilizando Gmail, es posible que necesite habilitar el acceso de aplicaciones menos seguras o crear una contraseña de aplicación específica.</p>
+        <p>Para Office 365, asegúrese de que su cuenta tenga permisos para enviar correos a través de SMTP.</p>
+    </div>
+    
+    <a href="/dashboard" class="btn btn-secondary">Volver al Dashboard</a>
+</div>
+</body>
+</html>

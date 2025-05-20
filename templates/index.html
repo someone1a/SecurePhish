@@ -10,6 +10,18 @@
 <body class="bg-light">
 <div class="container py-5">
     <h2>Bienvenido al Dashboard</h2>
+    
+    <!-- Mensajes flash para notificaciones -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     <div class="row">
         <div class="col-md-6">
             <h4>Plantillas disponibles</h4>
@@ -20,8 +32,16 @@
                     <input type="text" class="form-control" id="campaign_name" name="campaign_name" required maxlength="50">
                 </div>
                 <div class="mb-3">
+                    <label for="sender_email" class="form-label">Remitente (email simulado)</label>
+                    <input type="email" class="form-control" id="sender_email" name="sender_email" placeholder="ejemplo@empresa.com" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email_subject" class="form-label">Asunto del correo</label>
+                    <input type="text" class="form-control" id="email_subject" name="email_subject" maxlength="100" required>
+                </div>
+                <div class="mb-3">
                     <label for="selected_template" class="form-label">Seleccionar plantilla</label>
-                    <select class="form-select" id="selected_template" name="selected_template">
+                    <select class="form-select" id="selected_template" name="selected_template" onchange="loadTemplateContent()">
                         <option value="">Selecciona una plantilla</option>
                         {% for template in templates %}
                             <option value="{{ template }}">{{ template }}</option>
@@ -30,22 +50,87 @@
                 </div>
                 <div class="mb-3">
                     <label for="html_file" class="form-label">O subir una plantilla HTML</label>
-                    <input type="file" class="form-control" id="html_file" name="html_file" accept=".html">
+                    <input type="file" class="form-control" id="html_file" name="html_file" accept=".html" onchange="loadFileContent(event)">
+                </div>
+                <div class="mb-3">
+                    <label for="html_editor" class="form-label">Editar contenido HTML de la plantilla</label>
+                    <textarea class="form-control" id="html_editor" name="html_editor" rows="10" placeholder="Aquí aparecerá el HTML de la plantilla seleccionada o subida..."></textarea>
+                    <div class="form-text">Puedes personalizar el HTML antes de enviar la campaña.</div>
                 </div>
                 <button type="submit" class="btn btn-success">Crear campaña</button>
             </form>
         </div>
         <div class="col-md-6">
             <h4>Campañas creadas</h4>
+            <div class="mb-3">
+                <a href="/email_config" class="btn btn-primary">Configurar SMTP</a>
+            </div>
             <ul class="list-group">
                 {% for campaign in campaigns %}
-                    <li class="list-group-item">
-                        <a href="/campana/{{ campaign }}">{{ campaign }}</a>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="/campana/{{ campaign }}">{{ campaign }}</a>
+                            <div class="mt-2 d-flex flex-wrap gap-2">
+                                <a href="/logs/{{ campaign }}" class="btn btn-sm btn-info">Ver datos capturados</a>
+                                <a href="/recipients/{{ campaign }}" class="btn btn-sm btn-warning">Gestionar destinatarios</a>
+                                <a href="/send_campaign/{{ campaign }}" class="btn btn-sm btn-danger">Enviar campaña</a>
+                                <a href="/delete_campaign/{{ campaign }}" onclick="confirmarEliminar('{{ campaign }}')" class="btn btn-sm btn-dark">Eliminar campaña</a>
+                            </div>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">0 clics</span>
                     </li>
                 {% endfor %}
             </ul>
         </div>
     </div>
 </div>
+<!-- Modal de confirmación para eliminar campaña -->
+<div class="modal fade" id="eliminarCampanaModal" tabindex="-1" aria-labelledby="eliminarCampanaModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="eliminarCampanaModalLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar esta campaña? Esta acción no se puede deshacer.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a href="#" id="btnConfirmarEliminar" class="btn btn-danger">Eliminar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Simulación: Cargar contenido de plantilla (esto requiere backend para funcionar realmente)
+function loadTemplateContent() {
+    const select = document.getElementById('selected_template');
+    const editor = document.getElementById('html_editor');
+    // Aquí deberías hacer una petición AJAX para obtener el HTML real de la plantilla
+    editor.value = `<!-- Aquí se cargaría el HTML de la plantilla: ${select.value} -->`;
+}
+
+function loadFileContent(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('html_editor').value = e.target.result;
+        };
+        reader.readAsText(file);
+    }
+}
+
+function confirmarEliminar(campaignName) {
+    // Configurar el enlace de confirmación con la campaña correcta
+    document.getElementById('btnConfirmarEliminar').href = '/delete_campaign/' + campaignName;
+    
+    // Mostrar el modal de confirmación
+    const modal = new bootstrap.Modal(document.getElementById('eliminarCampanaModal'));
+    modal.show();
+}
+</script>
 </body>
 </html>
